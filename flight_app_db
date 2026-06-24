@@ -1,0 +1,108 @@
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+-- Δομή πίνακα για τον πίνακα `flights`
+
+CREATE TABLE `flights` (
+  `flight_number` varchar(10) NOT NULL,
+  `airplane` varchar(50) NOT NULL,
+  `flight_date` date NOT NULL,
+  `flight_time` time NOT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `total_seats` int(11) NOT NULL,
+  `rows_count` int(11) NOT NULL,
+  `seats_per_row` int(11) NOT NULL,
+  `business_rows` int(11) NOT NULL,
+  `status` enum('ΔΗΜΙΟΥΡΓΗΜΕΝΗ','ΣΤΕΛΕΧΩΜΕΝΗ','ΑΚΥΡΩΜΕΝΗ','ΠΕΡΑΤΩΜΕΝΗ') DEFAULT 'ΔΗΜΙΟΥΡΓΗΜΕΝΗ'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Δεδομένα του πίνακα `flights`
+
+
+INSERT INTO `flights` (`flight_number`, `airplane`, `flight_date`, `flight_time`, `created_at`, `updated_at`, `total_seats`, `rows_count`, `seats_per_row`, `business_rows`, `status`) VALUES
+('QA101', 'Boeing 737', '2026-08-12', '14:30:00', '2026-06-13 15:24:08', '2026-06-13 15:24:28', 120, 20, 6, 4, 'ΔΗΜΙΟΥΡΓΗΜΕΝΗ'),
+('SA202', 'Airbus A320', '2026-09-09', '12:00:00', '2026-06-13 15:40:52', '2026-06-13 15:40:52', 60, 10, 6, 2, 'ΔΗΜΙΟΥΡΓΗΜΕΝΗ'),
+('QA999', 'Airbus A321', '2026-05-01', '22:00:00', '2026-05-29 08:35:29', '2026-05-29 08:56:18', 60, 10, 6, 2, 'ΠΕΡΑΤΩΜΕΝΗ');
+
+-- Δομή πίνακα για τον πίνακα `reservations`
+
+CREATE TABLE `reservations` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `flight_number` varchar(10) NOT NULL,
+  `reservation_date` timestamp NULL DEFAULT current_timestamp(),
+  `modification_date` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `type` enum('BUSINESS','NORMAL','ECONOMY') NOT NULL,
+  `seat_row` int(11) DEFAULT NULL,
+  `seat_column` int(11) DEFAULT NULL,
+  `status` enum('ΔΗΜΙΟΥΡΓΗΜΕΝΗ','ΠΕΡΑΤΩΜΕΝΗ','ΑΚΥΡΩΜΕΝΗ') DEFAULT 'ΔΗΜΙΟΥΡΓΗΜΕΝΗ'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Δεδομένα του πίνακα `reservations`
+
+INSERT INTO `reservations` (`id`, `user_id`, `flight_number`, `reservation_date`, `modification_date`, `type`, `seat_row`, `seat_column`, `status`) VALUES
+(2, 12, 'SA202', '2026-06-13 15:41:32', '2026-06-13 15:55:56', 'ECONOMY', NULL, NULL, 'ΑΚΥΡΩΜΕΝΗ'),
+(3, 12, 'SA202', '2026-06-13 15:42:23', '2026-06-13 15:42:23', 'BUSINESS', 1, 2, 'ΔΗΜΙΟΥΡΓΗΜΕΝΗ');
+
+-- Δομή πίνακα για τον πίνακα `users`
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `first_name` varchar(50) NOT NULL,
+  `last_name` varchar(50) NOT NULL,
+  `identity_number` varchar(20) NOT NULL,
+  `status` enum('active','inactive') DEFAULT 'active',
+  `role` enum('visitor','customer','flight_admin','system_admin') NOT NULL,
+  `afm` varchar(10) DEFAULT NULL,
+  `address` varchar(150) DEFAULT NULL,
+  `employee_code` varchar(20) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Δεδομένα του πίνακα `users`
+
+INSERT INTO `users` (`id`, `username`, `email`, `password`, `first_name`, `last_name`, `identity_number`, `status`, `role`, `afm`, `address`, `employee_code`) VALUES
+(4, 'realadmin', 'sysadmin@samosairlines.co', '$2y$10$DeaoxKIMaaXEhr9uyGEpcuNdvdCSXWZqpiRsezkSrMEFFxS/gTnHi', 'Σωτηρία', 'Λάκη', 'AN998877', 'active', 'system_admin', NULL, NULL, 'EMP101'),
+(6, 'maria', 'maria@samosairlines.co', '$2y$10$PqnxaFyMi8v.0M7qFEM4o.3c7ExFbWlmyHkMoh/9h0f3FgWjD3pZS', 'Μαρία', 'Φωτίου', 'AB333444', 'active', 'flight_admin', NULL, NULL, 'EMP102'),
+(12, 'sotiria', 'sotiria@mail.com', '$2y$10$zIGVk.yHsNfvABWF3d6LKO0jVyGHyB.Q3j3LP2hLcNkacAyvq/dQe', 'Σωτηρία', 'Λάκη', 'AM112233', 'active', 'customer', '123456789', 'Κανάρη 15, Σάμος', NULL),
+(13, 'flightadmin', 'flightadmin@samosairlines.co', '$2y$10$unIuDF3kjaIIWcCc6S7Joucba6qU13JSdLkemZX7grnCYkyhXrggK', 'Μιχάλης', 'Καραγιάννης', 'AE445566', 'active', 'flight_admin', NULL, NULL, 'EMP103');
+
+-- Ευρετήρια για πίνακα `flights`
+
+ALTER TABLE `flights`
+  ADD PRIMARY KEY (`flight_number`);
+
+-- Ευρετήρια για πίνακα `reservations`
+
+ALTER TABLE `reservations`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `flight_number` (`flight_number`);
+
+-- Ευρετήρια για πίνακα `users`
+
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `username` (`username`),
+  ADD UNIQUE KEY `identity_number` (`identity_number`);
+
+-- AUTO_INCREMENT για πίνακα `reservations`
+
+ALTER TABLE `reservations`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+-- AUTO_INCREMENT για πίνακα `users`
+
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+-- Περιορισμοί για πίνακα `reservations`
+
+ALTER TABLE `reservations`
+  ADD CONSTRAINT `fk_reservations_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_reservations_flights` FOREIGN KEY (`flight_number`) REFERENCES `flights` (`flight_number`) ON DELETE CASCADE;
+COMMIT;
